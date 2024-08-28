@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Country Name</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+<div class="container">
+    <h1>COVID-19 Data by Country</h1>
+    <form id="countryForm">
+        <label for="country">Enter Country Name:</label>
+        <input type="text" id="country" name="country" required>
+        <button type="submit">Get Data</button>
+    </form>
+    <div id="result" class="result"></div> <!-- Where the data will be displayed -->
+</div>
+
+<script>
+    document.getElementById('countryForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Get the country name from the form
+        const country = document.getElementById('country').value;
+        const encodedCountry = encodeURIComponent(country);
+
+        // Make the AJAX request
+        fetch(`http://localhost:8080/getCountry/country?country=${encodedCountry}`)
+            .then(response => response.json()) // Parse the JSON response
+            .then(data => {
+                // Extract specific data fields from the response
+                const countryName = data["Country_text"];
+                const lastUpdate = data["Last Update"];
+                const totalCases = data["Total Cases_text"];
+                const totalDeaths = data["Total Deaths_text"];
+                const totalRecovered = data["Total Recovered_text"];
+                const activeCases = data["Active Cases_text"];
+                const newCases = data["New Cases_text"];
+                const newDeaths = data["New Deaths_text"];
+
+                // Display the data
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <h2>COVID-19 Data for ${countryName}</h2>
+                    <p><strong>Last Update:</strong> ${lastUpdate}</p>
+                    <div class="data-container">
+                        <div class="data-item"><strong>Total Cases:</strong> ${totalCases || 'N/A'}</div>
+                        <div class="data-item"><strong>Total Deaths:</strong> ${totalDeaths || 'N/A'}</div>
+                        <div class="data-item"><strong>Total Recovered:</strong> ${totalRecovered || 'N/A'}</div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = '<p>An error occurred while fetching the data.</p>';
+            });
+    });
+</script>
+</body>
+</html>
